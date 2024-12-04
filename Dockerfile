@@ -1,22 +1,17 @@
-# Importing JDK and copying required files
-FROM openjdk:19-jdk AS build
-WORKDIR /app
-COPY pom.xml .
-COPY src src
+# Use an official OpenJDK runtime as the base image
+FROM openjdk:17-jdk-alpine
 
-# Copy Maven wrapper
-COPY mvnw .
-COPY .mvn .mvn
-
-# Set execution permission for the Maven wrapper
-RUN chmod +x ./mvnw
-RUN ./mvnw clean package -DskipTests
-
-# Stage 2: Create the final Docker image using OpenJDK 19
-FROM openjdk:19-jdk
+# Add a volume pointing to /tmp
 VOLUME /tmp
 
-# Copy the JAR from the build stage
-COPY --from=build /app/target/*.jar app.jar
+# Make port 8080 available to the world outside this container
+EXPOSE 8181
+
+# The application's jar file
+ARG JAR_FILE=target/*.jar
+
+# Add the application's jar to the container
+ADD BooksPageable-0.0.1-SNAPSHOT.jar app.jar
+
+# Run the jar file
 ENTRYPOINT ["java","-jar","/app.jar"]
-EXPOSE 8080

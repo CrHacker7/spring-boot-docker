@@ -1,24 +1,37 @@
 pipeline {
     agent any
-
-    environment {
-        DOCKER_IMAGE = "crhacker7hub/spring-boot-app"
-        AWS_REGION = "us-east-1"
-        ECR_REGISTRY = "<your-aws-account-id>.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        ECR_REPOSITORY = "bookspageable"
-    }
-
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Crhacker7/BooksPageable.git'
+        stage("Clean Up"){
+            steps{
+                deleteDir()
             }
         }
-
-        stage('Build') {
+        stage("Clone Repo"){
             steps {
-                sh 'mvn clean package'
+                bat "git clone https://github.com/CrHacker7/spring-boot-docker.git"
+            }
+        }
+        stage("Build"){
+            steps {
+                dir("sspringbootbooksXXX") {
+                    bat "mvn clean install"
+                }
+            }
+        }
+        stage("Test") {
+            steps {
+                dir("spring-boot-docker") {
+                    bat "mvn test"
+                }
+            }
+        }
+        stage("Run") {
+            steps {
+                dir("sspringbootbooksXXX") {
+                    bat "mvn spring-boot:run"
+                }
             }
         }
     }
 }
+
